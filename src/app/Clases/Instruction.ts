@@ -1,4 +1,4 @@
-export class Instruction{
+export class Instruction {
 
     private id: string;
     private type: string;
@@ -9,34 +9,48 @@ export class Instruction{
     private UFType: string;
     private arrayType: string;
     private cycles: string;
+    dependecies: String[] = new Array;
+    private status: string;
 
-    constructor (id:string, type: string, destination: string, op1: string, op2: string, UFType: string, array: string){
-        this.id=id;
-        this.type=type;
-        this.destination=destination;
-        this.op1=op1;
-        this.op2=op2;
-        this.UFType = UFType; 
+    constructor(id: string, type: string, destination: string, op1: string, op2: string, UFType: string, array: string) {
+        this.id = id;
+        this.type = type;
+        this.destination = destination;
+        this.op1 = op1;
+        this.op2 = op2;
+        this.UFType = UFType;
         this.arrayType = array;
     }
 
-    public setArrayType(array:string){
+    public getUFType(){
+        return this.UFType;
+    }
+
+    public setStatus(status: string){
+        this.status = status;
+    }
+
+    public getStatus(){
+        return this.status;
+    }
+
+    public setArrayType(array: string) {
         this.arrayType = array;
     }
 
-    public getArrayType(){
+    public getArrayType() {
         return this.arrayType;
     }
 
-    public setOp1(op1: string){
+    public setOp1(op1: string) {
         this.op1 = op1;
     }
 
-    public setId(id :string){
+    public setId(id: string) {
         this.id = id;
     }
 
-    public getId(){
+    public getId() {
         return this.id;
     }
 
@@ -69,4 +83,17 @@ export class Instruction{
         return this.cycles;
     }
 
+    public existDependency(inst: Instruction) {
+        return (this.dependecies.includes(inst.id));
+    }
+
+    public decrementCycle(){
+        let ciclo: number = parseInt(this.cycles);
+        ciclo--;
+        this.cycles = ciclo.toString();
+      }
+
+    public addDependency(i: String) {
+        this.dependecies.push(i)
+    }  
 }

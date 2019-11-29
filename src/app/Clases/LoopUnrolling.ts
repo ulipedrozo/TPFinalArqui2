@@ -141,7 +141,6 @@ export class LoopUnrolling {
                 }
 
             } else if (this.listInstructions[i].getType() == "SUB" && this.listInstructions[i].getOp2().includes("#")) {
-                console.log("Pasa por ld");
                 let inst;
                 if (this.listInstructions[i].getOp2().includes('4')) {
                     let shift = 4 * maxUnroll;

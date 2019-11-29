@@ -2,6 +2,8 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Instruction } from './Clases/Instruction';
 import { toInteger } from '@ng-bootstrap/ng-bootstrap/util/util';
 import { LoopUnrolling } from './Clases/LoopUnrolling';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { Processor } from './Clases/Processor';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +18,7 @@ export class AppComponent implements OnInit {
 
   listInstructions = new Array<Instruction>();
   listInstructionsUnrolling = new Array<Instruction>();
+  listaSinLazo = new Array<Instruction>();
 
   numOrder = 1;
   numMultifunction = 0;
@@ -27,9 +30,10 @@ export class AppComponent implements OnInit {
   // variables simulador
   sigInstruction = true;
   executing = false;
+  executeLoop = false;
   DHeaders: Array<string>;
-  DUFHeaders: Array<string>;
-
+  UFHeaders: Array<string>;
+  cpu: Processor;
 
   typeInstruction = [
     { type: "ADD", cycle: 1 },
@@ -228,11 +232,11 @@ export class AppComponent implements OnInit {
   addInstruction() {
     let instNueva;
 
-    if (this.btnDefaultIns.type == "ST"){
+    if (this.btnDefaultIns.type == "ST") {
       instNueva = new Instruction("", this.btnDefaultIns.type, "0 (" + this.btnDefaultIns.dst + ")", this.btnDefaultIns.op1, "", "MEM", this.mapTipoArreglos.get(this.btnDefaultIns.dst));
     }
     else
-      if (this.btnDefaultIns.type == "LD"){
+      if (this.btnDefaultIns.type == "LD") {
         instNueva = new Instruction("", this.btnDefaultIns.type, this.btnDefaultIns.dst, "0 (" + this.btnDefaultIns.op1 + ")", "", "MEM", this.mapTipoArreglos.get(this.btnDefaultIns.op1));
       }
       else
@@ -284,39 +288,41 @@ export class AppComponent implements OnInit {
     this.numMemory = num;
   }
 
-  changeCycle(pos,numcycle){
+  changeCycle(pos, numcycle) {
     for (let tipoIns of this.typeInstruction) {
-        if (tipoIns.type == pos)
-          tipoIns.cycle = numcycle;
+      if (tipoIns.type == pos)
+        tipoIns.cycle = numcycle;
     }
   }
 
-  saveConfiguration(){
-    if(this.numArithmetic!=0 || this.numMemory != 0 || this.numMultifunction!=0){
+  saveConfiguration() {
+    if (this.numArithmetic != 0 || this.numMemory != 0 || this.numMultifunction != 0) {
       this.configurationSaved = true;
+      this.executeLoop = false;
       this.executing = true;
       this.showAlert = false;
     }
-    else{
+    else {
       this.showAlert = true;
     }
-    this.setCycles();
   }
 
-  private setCycles(){
-    for(let i=0 ; i< this.listInstructions.length; i++){
-      for (let j =0 ; j < this.typeInstruction.length; j++)
-        if (this.listInstructions[i].getType() == this.typeInstruction[j].type){
-          this.listInstructions[i].setCycles(this.typeInstruction[j].cycle);
-        }    
-      }   
+  private setCycles() {
+    for (let i = 0; i < this.listInstructionsUnrolling.length; i++) {
+      for (let j = 0; j < this.typeInstruction.length; j++)
+        if (this.listInstructionsUnrolling[i].getType() == this.typeInstruction[j].type) {
+          this.listInstructionsUnrolling[i].setCycles(this.typeInstruction[j].cycle);
+        }
+    }
   }
 
-  resetConfiguration(){
+  resetConfiguration() {
     this.configurationSaved = false;
     this.sigInstruction = false;
     this.executing = false;
+    this.executeLoop = false;
     this.listInstructionsUnrolling = null;
+    this.listaSinLazo = new Array<Instruction>();
   }
 
   ejecutarLoopUnrolling() {
@@ -325,48 +331,109 @@ export class AppComponent implements OnInit {
 
     let loop = new LoopUnrolling(this.listInstructions);
     this.listInstructionsUnrolling = loop.ejecutar(maxUnroll);
-  
+    this.setCycles();
     this.simuladorLoopUnrolling();
 
   }
 
-  simuladorLoopUnrolling(){
+  simuladorLoopUnrolling() {
 
     this.sigInstruction = true;
     this.executing = false;
-    this.createTableHead("D",this.numOrder);
-    this.createTableHeadUF("UF",this.numMultifunction,this.numMemory,this.numArithmetic);
-    
+    this.executeLoop = true;
+    this.createTableHead("D", this.numOrder);
+    this.createTableHeadUF("UF", this.numMultifunction, this.numMemory, this.numArithmetic);
+
+    for (let index = 0; index < this.listInstructionsUnrolling.length; index++){
+      if (this.listInstructionsUnrolling[index].getId() != ""){
+        this.listaSinLazo.push(this.listInstructionsUnrolling[index]);
+      }
+    } 
+    console.log(this.listaSinLazo);
+    this.cpu = new Processor(this.listaSinLazo, this.numOrder);
+    this.cpu.addUF(this.numArithmetic, this.numMemory, this.numMultifunction);
   }
 
-  getOperandoParentesis(operando: string): string{
-    let pos1: number = operando.indexOf('(');
-    let pos2: number = operando.indexOf(')');
-    return operando.substring(pos1 + 1, pos2);
+  public nextInstruction() {
+    if (!this.cpu.isFinished()) {
+      this.cpu.nextCycle();
+      this.addRowCounter(this.cpu.getCycleCounter());
+      this.addRow(this.cpu.getDispatcher().instruction, "tablaDispatch", this.numOrder);
+      this.addRowUF(this.cpu.getUF());
+    }
+    else {
+      this.sigInstruction = false;
+      //this.showFinished = true;
+      //this.timePar = this.cpu.getCycleCounter();
+      //this.timeTotal = this.timeSec / this.timePar;
+    }
   }
 
-  private createTableHead(desc:string, num:number){
+  addRowCounter(cycleCounter: number) {
+    let tr = document.createElement("tr");
+    let td = document.createElement("td");
+    td.appendChild(document.createTextNode("" + cycleCounter));
+    tr.appendChild(td);
+    document.getElementById("tablacycle").appendChild(tr);
+
+  }
+
+  addRow(inst: Array<Instruction>, id: string, cantidad: Number) {
+    let tr = document.createElement("tr");
+    for (let i = 0; i < cantidad; i++) {
+      let td = document.createElement("td");
+      if (i < inst.length) {
+        td.appendChild(document.createTextNode(inst[i].getId()));
+        tr.appendChild(td);
+      }
+      else {
+        td.appendChild(document.createTextNode("-"));
+        tr.appendChild(td);
+      }
+    }
+    document.getElementById(id).appendChild(tr);
+  }
+
+  addRowUF(uf){
+    let tr = document.createElement("tr");
+    for(let i = 0; i < uf.length;i++){
+        let td = document.createElement("td");
+        if (uf[i].getInstruction()!= null){
+            td.appendChild(document.createTextNode(uf[i].getInstruction().getId()));
+            tr.appendChild(td);
+        }
+        else
+        {
+            td.appendChild(document.createTextNode("-"));
+            tr.appendChild(td);
+        }
+        
+    }
+    document.getElementById("tablaUF").appendChild(tr);
+}
+
+  private createTableHead(desc: string, num: number) {
     let array = [];
     for (let i = 0; i < num; i++) {
-      array.push(desc+i);
+      array.push(desc + i);
     }
-    this[desc+'Headers'] = array;
+    this[desc + 'Headers'] = array;
   }
 
-  private createTableHeadUF(desc:string, numM:number, numMem:number,numA:number){
+  private createTableHeadUF(desc: string, numM: number, numMem: number, numA: number) {
     let array = [];
     for (let i = 0; i < numM; i++) {
-      array.push(desc+"M"+i);
+      array.push(desc + "M" + i);
     }
     for (let i = 0; i < numA; i++) {
-      array.push(desc+"A"+i);
+      array.push(desc + "A" + i);
     }
     for (let i = 0; i < numMem; i++) {
-      array.push(desc+"Mem"+i);
-    }    
-    this[desc+'Headers'] = array;
+      array.push(desc + "Mem" + i);
+    }
+    this[desc + 'Headers'] = array;
   }
 
-  
+
 
 }

@@ -374,7 +374,56 @@
 
 
       <div class="row justify-content-center bpadding-15">
-        <div class=col-md-6>
+        <div class=col-md-8>
+          <div class="row">
+            <div class="col bpadding-15">
+              <h5 class="text-white bpadding-15">Simulador</h5>
+              <button *ngIf="executeLoop" id="btn-next" class="btn btn-outline-secondary"
+                (click)="nextInstruction()">Siguiente ciclo</button>
+            </div>
+          </div>
+
+          <div class="class row">
+            <div class="col">
+              <div id="table-processor">
+                <div class=" processor-table">
+                  <table id="tablacycle" class="table table-bordered " *ngIf="executeLoop">
+                    <thead>
+                      <tr>
+                        <th scope="col">Ciclo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{rowCycle}}
+                    </tbody>
+                  </table>
+
+                  <table id="tablaDispatch" class="table table-bordered " *ngIf="executeLoop">
+                    <thead>
+                      <th *ngFor="let header of DHeaders">
+                        {{header}}
+                      </th>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                  </table>
+
+                  <table id="tablaUF" class="table table-bordered " *ngIf="executeLoop">
+                    <thead>
+                      <th *ngFor="let header of UFHeaders">
+                        {{header}}
+                      </th>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class=col-md-4>
           <div class="row">
             <div class="col text">
               <h5 class="text-white text-center bpadding-15">Loop Unrolling</h5>
@@ -391,14 +440,6 @@
               </tr>
             </tbody>
           </table>
-        </div>
-
-        <div class=col-md-6>
-          <div class="row">
-            <div class="col text">
-              <h5 class="text-white text-center bpadding-15">Simulador</h5>
-            </div>
-          </div>
         </div>
       </div>
     </div>
