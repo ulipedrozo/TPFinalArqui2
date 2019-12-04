@@ -4,6 +4,7 @@ import { toInteger } from '@ng-bootstrap/ng-bootstrap/util/util';
 import { LoopUnrolling } from './Clases/LoopUnrolling';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { Processor } from './Clases/Processor';
+import { VirtualTimeScheduler } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -20,12 +21,35 @@ export class AppComponent implements OnInit {
   listInstructionsUnrolling = new Array<Instruction>();
   listaSinLazo = new Array<Instruction>();
 
+  listExample1 = new Array<Instruction>();
+  listExample2 = new Array<Instruction>();
+  listExample3 = new Array<Instruction>();
+  listExample4 = new Array<Instruction>();
+
+  advertencia: string;
+  maxUnroll: number;
+  cantidadCiclosFor = 1000;
+  timeSec = 0;
+  timePar = 0;
+  timeTotal;
   numOrder = 1;
   numMultifunction = 0;
   numArithmetic = 0;
   numMemory = 0;
   configurationSaved: boolean = false;
+
+  configurationSavedCycles: boolean = false;
+  configurationSavedLazo: boolean = true;
+  configurationSavedArr: boolean = true;
+  configurationSavedInst: boolean = true;
+
+  ciclosDesarrollados: number = 0;
+  tiempoTotalsecuencial: number = 0;
+  tiempoTotalplanificado: number = 0;
+  aceleracion: number = 0;
+
   showAlert = false;
+
 
   // variables simulador
   sigInstruction = true;
@@ -43,7 +67,6 @@ export class AppComponent implements OnInit {
     { type: "ST", cycle: 1 },
     { type: "LD", cycle: 1 },
     { type: "BNEZ", cycle: 1 },
-    { type: "LAZO", cycle: 1 }
   ];
 
   registers: string[] = [
@@ -103,21 +126,83 @@ export class AppComponent implements OnInit {
     "DOUBLE",
   ];
 
-  cycles: string[] = [
-    "100", "500", "1000", "2000", "3000", "4000"
-  ];
-
   ngOnInit(): void {
-    const instrucions = [
-      new Instruction("", "LD", "R1", "4000", "", "ARITH", ""),
-      new Instruction("", "LAZO", "", "", "", "", ""),
-      new Instruction("", "LD", "R2", "0 (R1)", "", "MEM", "ENTERO"),
-      new Instruction("", "ADD", "R4", "R2", "R3", "ARITH", ""),
-      new Instruction("", "ST", "0 (R1)", "R4", "", "MEM", "ENTERO"),
-      new Instruction("", "SUB", "R1", "R1", "#4", "ARITH", ""),
-      new Instruction("", "BNEZ", "R1", "LAZO", "", "ARITH", "")
+    this.listExample1 = [
+      new Instruction("", "LD", "R1", "4000", "", "ARITH", "ENTERO", 1000),
+      new Instruction("", "LAZO", "", "", "", "", "", 0),
+      new Instruction("", "LD", "R2", "0 (R1)", "", "MEM", "ENTERO", 0),
+      new Instruction("", "SUB", "R4", "R2", "R10", "ARITH", "", 0),
+      new Instruction("", "ST", "0 (R1)", "R4", "", "MEM", "ENTERO", 0),
+      new Instruction("", "SUB", "R1", "R1", "#4", "ARITH", "", 0),
+      new Instruction("", "BNEZ", "R1", "LAZO", "", "ARITH", "", 0)
     ];
-    this.listInstructions = instrucions;
+
+    this.listExample2 = [
+      new Instruction("", "LD", "R1", "4000", "", "ARITH", "ENTERO", 1000),
+      new Instruction("", "LD", "R2", "12000", "", "ARITH", "DOUBLE", 1000),
+      new Instruction("", "LAZO", "", "", "", "", "", 0),
+      new Instruction("", "LD", "R3", "0 (R1)", "", "MEM", "ENTERO", 0),
+      new Instruction("", "MUL", "R4", "R3", "R10", "ARITH", "", 0),
+      new Instruction("", "ST", "0 (R1)", "R4", "", "MEM", "ENTERO", 0),
+      new Instruction("", "LD", "R5", "0 (R2)", "", "MEM", "DOUBLE", 0),
+      new Instruction("", "ADD", "R6", "R11", "R5", "ARITH", "", 0),
+      new Instruction("", "ST", "0 (R2)", "R6", "", "MEM", "DOUBLE", 0),
+      new Instruction("", "SUB", "R1", "R1", "#4", "ARITH", "", 0),
+      new Instruction("", "SUB", "R2", "R2", "#8", "ARITH", "", 0),
+      new Instruction("", "BNEZ", "R1", "LAZO", "", "ARITH", "", 0)
+    ];
+
+    this.listExample3 = [
+      new Instruction("", "LD", "R5", "16000", "", "ARITH", "DOUBLE", 2000),
+      new Instruction("", "LAZO", "", "", "", "", "", 0),
+      new Instruction("", "LD", "R2", "0 (R5)", "", "MEM", "DOUBLE", 0),
+      new Instruction("", "DIV", "R4", "R2", "R3", "ARITH", "", 0),
+      new Instruction("", "ST", "0 (R5)", "R4", "", "MEM", "DOUBLE", 0),
+      new Instruction("", "SUB", "R1", "R1", "#8", "ARITH", "", 0),
+      new Instruction("", "BNEZ", "R1", "LAZO", "", "ARITH", "", 0)
+    ];
+
+    this.listExample4 = [
+      new Instruction("", "LD", "R1", "4000", "", "ARITH", "ENTERO", 1000),
+      new Instruction("", "LD", "R2", "8000", "", "ARITH", "ENTERO", 1000),
+      new Instruction("", "LAZO", "", "", "", "", "", 0),
+      new Instruction("", "LD", "R5", "0 (R1)", "", "MEM", "ENTERO", 0),
+      new Instruction("", "ADD", "R4", "R5", "R15", "ARITH", "", 0),
+      new Instruction("", "ST", "0 (R1)", "R4", "", "MEM", "ENTERO", 0),
+      new Instruction("", "LD", "R10", "0 (R2)", "", "MEM", "ENTERO", 0),
+      new Instruction("", "DIV", "R7", "R10", "R11", "ARITH", "", 0),
+      new Instruction("", "ST", "0 (R2)", "R7", "", "MEM", "ENTERO", 0),
+      new Instruction("", "SUB", "R1", "R1", "#4", "ARITH", "", 0),
+      new Instruction("", "SUB", "R2", "R2", "#4", "ARITH", "", 0),
+      new Instruction("", "BNEZ", "R1", "LAZO", "", "ARITH", "", 0)
+    ];
+  }
+
+  changeExample1() {
+    this.cantidadCiclosFor = 1000;
+    this.listInstructions = Object.assign([], this.listExample1);
+  }
+
+  changeExample2() {
+    this.cantidadCiclosFor = 1000;
+    this.listInstructions = Object.assign([], this.listExample2);
+  }
+
+  changeExample3() {
+    this.cantidadCiclosFor = 2000;
+    this.listInstructions = Object.assign([], this.listExample3);
+  }
+
+  changeExample4() {
+    this.cantidadCiclosFor = 1000;
+    this.listInstructions = Object.assign([], this.listExample4);
+  }
+
+  changeLoop(num) {
+    this.cantidadCiclosFor = num;
+    let btnCiclos = document.getElementById("btn-Confirmar");
+    if (this.cantidadCiclosFor != 0)
+      btnCiclos.removeAttribute("disabled");
   }
 
   changeInst(pos, name) {
@@ -133,31 +218,42 @@ export class AppComponent implements OnInit {
   updateButtonLoad() {
     let btnAgregarLd = document.getElementById("btn-Agregar-LD");
 
-    if (this.btnDefaultCarga.typeReg != "Tipo" && this.btnDefaultCarga.dstLoad != "Dst" && this.btnDefaultCarga.cycles != "Cantidad ciclos")
+    if (this.btnDefaultCarga.typeReg != "Tipo" && this.btnDefaultCarga.dstLoad != "Dst")
       btnAgregarLd.removeAttribute("disabled");
+  }
+
+  habilitaCargaArreglos() {
+    this.configurationSavedCycles = true;
+    this.configurationSavedArr = false;
+  }
+
+  habilitaCargaInst() {
+    this.configurationSavedArr = true;
+    let instNueva = new Instruction("", "LAZO", "", "", "", "", "", 0);
+    this.listInstructions.push(instNueva);
+    this.configurationSavedInst = false;
+    this.configurationSavedLazo = true;
   }
 
   addInstructionLoad() {
     let instNueva;
 
     let tipo: string = this.btnDefaultCarga.typeReg;
-    let ciclos: number = parseInt(this.btnDefaultCarga.cycles);
     let tamano: number;
     if (tipo == "ENTERO")
-      tamano = ciclos * 4;
+      tamano = this.cantidadCiclosFor * 4;
     else
-      tamano = ciclos * 8;
+      tamano = this.cantidadCiclosFor * 8;
 
     let tamTot;
     if (this.listInstructions.length > 0) {
-      tamTot = tamano + parseInt(this.listInstructions[this.listInstructions.length - 1].getOp1()); // Ver esto
+      tamTot = tamano + parseInt(this.listInstructions[this.listInstructions.length - 1].getOp1());
     } else
       tamTot = tamano;
 
+    this.configurationSavedLazo = false;
     this.mapTipoArreglos.set(this.btnDefaultCarga.dstLoad, tipo);
-    instNueva = new Instruction("", "LD", this.btnDefaultCarga.dstLoad, tamTot.toString(), "", "ARITH", "");
-    instNueva.setciclosFor(tamano);
-    instNueva.setArrayType(tipo);
+    instNueva = new Instruction("", "LD", this.btnDefaultCarga.dstLoad, tamTot.toString(), "", "ARITH", tipo, this.cantidadCiclosFor);
     this.listInstructions.push(instNueva);
   }
 
@@ -233,20 +329,17 @@ export class AppComponent implements OnInit {
     let instNueva;
 
     if (this.btnDefaultIns.type == "ST") {
-      instNueva = new Instruction("", this.btnDefaultIns.type, "0 (" + this.btnDefaultIns.dst + ")", this.btnDefaultIns.op1, "", "MEM", this.mapTipoArreglos.get(this.btnDefaultIns.dst));
+      instNueva = new Instruction("", this.btnDefaultIns.type, "0 (" + this.btnDefaultIns.dst + ")", this.btnDefaultIns.op1, "", "MEM", this.mapTipoArreglos.get(this.btnDefaultIns.dst), 0);
     }
     else
       if (this.btnDefaultIns.type == "LD") {
-        instNueva = new Instruction("", this.btnDefaultIns.type, this.btnDefaultIns.dst, "0 (" + this.btnDefaultIns.op1 + ")", "", "MEM", this.mapTipoArreglos.get(this.btnDefaultIns.op1));
+        instNueva = new Instruction("", this.btnDefaultIns.type, this.btnDefaultIns.dst, "0 (" + this.btnDefaultIns.op1 + ")", "", "MEM", this.mapTipoArreglos.get(this.btnDefaultIns.op1), 0);
       }
       else
         if (this.btnDefaultIns.type == "BNEZ")
-          instNueva = new Instruction("", this.btnDefaultIns.type, this.btnDefaultIns.dst, "LAZO", "", "ARITH", "");
+          instNueva = new Instruction("", this.btnDefaultIns.type, this.btnDefaultIns.dst, "LAZO", "", "ARITH", "", 0);
         else
-          if (this.btnDefaultIns.type == "LAZO")
-            instNueva = new Instruction("", this.btnDefaultIns.type, "", "", "", "", "");
-          else
-            instNueva = new Instruction("", this.btnDefaultIns.type, this.btnDefaultIns.dst, this.btnDefaultIns.op1, this.btnDefaultIns.op2, "ARITH", "");
+          instNueva = new Instruction("", this.btnDefaultIns.type, this.btnDefaultIns.dst, this.btnDefaultIns.op1, this.btnDefaultIns.op2, "ARITH", "", 0);
     this.listInstructions.push(instNueva);
   }
 
@@ -257,20 +350,23 @@ export class AppComponent implements OnInit {
   deleteInstruction(inst: Instruction) {
     let i = this.listInstructions.indexOf(inst);
     if (this.listInstructions[i].getType() == "LD" && !this.listInstructions[i].getOp1().includes('(')) {
-      this.recalculateCycles(i, this.listInstructions[i].getciclosFor());
+      this.recalculateCycles(i, this.listInstructions[i].getciclosFor(), this.listInstructions[i].getArrayType());
       this.mapTipoArreglos.delete(this.listInstructions[i].getDestination());
     }
     this.listInstructions.splice(i, 1);
 
   }
 
-  recalculateCycles(i: number, op1: number) {
+  recalculateCycles(i: number, ciclos: number, tipo: string) {
 
     for (var j = 0; j < this.listInstructions.length; j++)
       if (this.listInstructions[j].getType() == "LD" && !this.listInstructions[j].getOp1().includes('(')) {
         if (i < j) {
-          let actual: number = parseInt(this.listInstructions[j].getOp1());
-          this.listInstructions[j].setOp1((actual - op1).toString());
+          const actual: number = parseInt(this.listInstructions[j].getOp1());
+          if (tipo == "ENTERO")
+            this.listInstructions[j].setOp1((actual - (ciclos * 4)).toString());
+          else
+            this.listInstructions[j].setOp1((actual - (ciclos * 8)).toString());
         }
       }
 
@@ -296,18 +392,46 @@ export class AppComponent implements OnInit {
   }
 
   saveConfiguration() {
-    if (this.numArithmetic != 0 || this.numMemory != 0 || this.numMultifunction != 0) {
-      this.configurationSaved = true;
-      this.executeLoop = false;
-      this.executing = true;
-      this.showAlert = false;
-    }
+    if (this.listInstructions.length != 0)
+      if (this.chequeoCiclosArr()) {
+        console.log(this.chequeoCiclosArr())
+        if (this.numArithmetic != 0 || this.numMemory != 0 || this.numMultifunction != 0) {
+          this.showAlert = false;
+          this.configurationSaved = true;
+          this.configurationSavedCycles = true;
+          this.configurationSavedArr = true;
+          this.configurationSavedLazo = true;
+          this.configurationSavedInst = true;
+
+          this.executeLoop = false;
+          this.executing = true;
+        } else {
+          this.advertencia = "Debes agregar una UF para ejecutar las instrucciones."
+          this.showAlert = true;
+        }
+      } else {
+        console.log("Entra 2");
+        this.advertencia = "Todos los arreglos deben ser definidos para la misma cantidad de Ciclos."
+        this.showAlert = true;
+      }
     else {
+      this.advertencia = "Ingrese Instrucciones."
       this.showAlert = true;
     }
   }
 
-  private setCycles() {
+  chequeoCiclosArr(): boolean {
+    let result: boolean = true;
+    let check: number = this.listInstructions[0].getciclosFor();
+    this.listInstructions.forEach(e => {
+      if (e.getType() == "LD" && !e.getOp1().includes('(')) 
+        if (e.getciclosFor() != check)
+          result = false;
+    });
+    return result;
+  }
+
+  private setCyclesUnrolling() {
     for (let i = 0; i < this.listInstructionsUnrolling.length; i++) {
       for (let j = 0; j < this.typeInstruction.length; j++)
         if (this.listInstructionsUnrolling[i].getType() == this.typeInstruction[j].type) {
@@ -316,24 +440,58 @@ export class AppComponent implements OnInit {
     }
   }
 
+  private setCycles() {
+    for (let i = 0; i < this.listInstructions.length; i++) {
+      for (let j = 0; j < this.typeInstruction.length; j++)
+        if (this.listInstructions[i].getType() == this.typeInstruction[j].type) {
+          this.listInstructions[i].setCycles(this.typeInstruction[j].cycle);
+        }
+    }
+  }
+
   resetConfiguration() {
     this.configurationSaved = false;
+    this.showAlert = false;
+    this.configurationSavedCycles = false;
+    this.configurationSavedArr = true;
+    this.configurationSavedInst = true;
+    this.configurationSavedLazo = true;
     this.sigInstruction = false;
     this.executing = false;
     this.executeLoop = false;
+    this.listInstructions = new Array<Instruction>();
     this.listInstructionsUnrolling = null;
     this.listaSinLazo = new Array<Instruction>();
+    document.getElementById("Desarrollo").style.display = "none";
+    document.getElementById("Result").style.display = "none";
   }
 
   ejecutarLoopUnrolling() {
+    document.getElementById("Desarrollo").style.display = "block";
 
-    let maxUnroll = Math.max(this.numArithmetic, this.numMemory, this.numMultifunction);
+    this.maxUnroll = Math.max(this.numArithmetic, this.numMemory, this.numMultifunction);
+    this.setCycles();
+    this.timeSec = this.getTimeSecuencial();
 
     let loop = new LoopUnrolling(this.listInstructions);
-    this.listInstructionsUnrolling = loop.ejecutar(maxUnroll);
-    this.setCycles();
+    this.listInstructionsUnrolling = loop.ejecutar(this.maxUnroll);
+    this.setCyclesUnrolling();
     this.simuladorLoopUnrolling();
 
+  }
+
+  public getTimeSecuencial() {
+    let sum = 0;
+    let pasoLazo: boolean = false;
+    console.log(this.listInstructions);
+    for (let inst of this.listInstructions) {
+      if (pasoLazo)
+        sum = sum + parseInt(inst.getcycles());
+      if (inst.getType() == 'LAZO')
+        pasoLazo = true;
+    }
+    console.log(sum);
+    return sum;
   }
 
   simuladorLoopUnrolling() {
@@ -344,12 +502,13 @@ export class AppComponent implements OnInit {
     this.createTableHead("D", this.numOrder);
     this.createTableHeadUF("UF", this.numMultifunction, this.numMemory, this.numArithmetic);
 
-    for (let index = 0; index < this.listInstructionsUnrolling.length; index++){
-      if (this.listInstructionsUnrolling[index].getId() != ""){
+    for (let index = 0; index < this.listInstructionsUnrolling.length; index++) {
+      if (this.listInstructionsUnrolling[index].getId() != "") {
         this.listaSinLazo.push(this.listInstructionsUnrolling[index]);
       }
-    } 
-    console.log(this.listaSinLazo);
+
+    }
+
     this.cpu = new Processor(this.listaSinLazo, this.numOrder);
     this.cpu.addUF(this.numArithmetic, this.numMemory, this.numMultifunction);
   }
@@ -363,9 +522,14 @@ export class AppComponent implements OnInit {
     }
     else {
       this.sigInstruction = false;
-      //this.showFinished = true;
-      //this.timePar = this.cpu.getCycleCounter();
-      //this.timeTotal = this.timeSec / this.timePar;
+      document.getElementById("Result").style.display = "block";
+      this.timePar = this.cpu.getCycleCounter();
+      console.log(this.timeSec);
+      this.ciclosDesarrollados = this.cantidadCiclosFor / this.maxUnroll;
+
+      this.tiempoTotalsecuencial = this.cantidadCiclosFor * this.timeSec;
+      this.tiempoTotalplanificado = this.ciclosDesarrollados * this.timePar;
+      this.aceleracion = this.tiempoTotalsecuencial / this.tiempoTotalplanificado;
     }
   }
 
@@ -394,23 +558,22 @@ export class AppComponent implements OnInit {
     document.getElementById(id).appendChild(tr);
   }
 
-  addRowUF(uf){
+  addRowUF(uf) {
     let tr = document.createElement("tr");
-    for(let i = 0; i < uf.length;i++){
-        let td = document.createElement("td");
-        if (uf[i].getInstruction()!= null){
-            td.appendChild(document.createTextNode(uf[i].getInstruction().getId()));
-            tr.appendChild(td);
-        }
-        else
-        {
-            td.appendChild(document.createTextNode("-"));
-            tr.appendChild(td);
-        }
-        
+    for (let i = 0; i < uf.length; i++) {
+      let td = document.createElement("td");
+      if (uf[i].getInstruction() != null) {
+        td.appendChild(document.createTextNode(uf[i].getInstruction().getId()));
+        tr.appendChild(td);
+      }
+      else {
+        td.appendChild(document.createTextNode("-"));
+        tr.appendChild(td);
+      }
+
     }
     document.getElementById("tablaUF").appendChild(tr);
-}
+  }
 
   private createTableHead(desc: string, num: number) {
     let array = [];

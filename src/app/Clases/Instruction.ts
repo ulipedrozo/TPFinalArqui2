@@ -10,9 +10,8 @@ export class Instruction {
     private arrayType: string;
     private cycles: string;
     dependecies: String[] = new Array;
-    private status: string;
 
-    constructor(id: string, type: string, destination: string, op1: string, op2: string, UFType: string, array: string) {
+    constructor(id: string, type: string, destination: string, op1: string, op2: string, UFType: string, array: string, ciclosFor: number) {
         this.id = id;
         this.type = type;
         this.destination = destination;
@@ -20,18 +19,11 @@ export class Instruction {
         this.op2 = op2;
         this.UFType = UFType;
         this.arrayType = array;
+        this.ciclosFor = ciclosFor;
     }
 
     public getUFType(){
         return this.UFType;
-    }
-
-    public setStatus(status: string){
-        this.status = status;
-    }
-
-    public getStatus(){
-        return this.status;
     }
 
     public setArrayType(array: string) {

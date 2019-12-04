@@ -1,7 +1,7 @@
 <body id="page-top">
 
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg bg-secondary text-uppercase fixed-top" id="mainNav">
+  <nav class="navbar navbar-expand-lg bg-secondary text-uppercase " id="mainNav">
     <div class="container">
       <a class="navbar-brand js-scroll-trigger" href="#page-top">Unicen</a>
       <button class="navbar-toggler navbar-toggler-right text-uppercase font-weight-bold bg-primary text-white rounded"
@@ -65,6 +65,30 @@
         <div class=col-md-6>
           <div class="row">
             <div class="col text">
+              <h5 class="text-secondary">Cantidad de Ciclos del Loop</h5>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <div class="btn-group mr-3 bpadding-15">
+                <div class="btn-group " ngbDropdown role="group" aria-label="Button group with nested dropdown">
+                  <button class="btn btn-outline-primary">Cantidad de Ciclos </button>
+                  <button [disabled]="configurationSavedCycles" id="btn-cycles" class="btn btn-outline-primary"
+                    ngbDropdownToggle>{{cantidadCiclosFor}}</button>
+                  <div class="dropdown-menu" ngbDropdownMenu>
+                    <button class="dropdown-item" *ngFor="let num of [100,500,1000,2000,3000,5000]"
+                      (click)="changeLoop(num)">{{ num }}</button>
+                  </div>
+                </div>
+                <button [disabled]="configurationSavedCycles" id="btn-Confirmar" type="button"
+                  class="btn btn-outline-primary" (click)="habilitaCargaArreglos()">Confirmar</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col text">
               <h5 class="text-secondary">Carga de Arreglos</h5>
             </div>
           </div>
@@ -74,7 +98,7 @@
               <div class="btn-group mr-3 bpadding-15">
                 <div class="btn-group " ngbDropdown role="group" aria-label="Button group with nested dropdown">
                   <button class="btn btn-outline-primary">LD </button>
-                  <button [disabled]="configurationSaved" id="btn-dst-load" class="btn btn-outline-primary"
+                  <button [disabled]="configurationSavedArr" id="btn-dst-load" class="btn btn-outline-primary"
                     ngbDropdownToggle>{{btnDefaultCarga.dstLoad}}</button>
                   <div class="dropdown-menu" ngbDropdownMenu>
                     <button class="dropdown-item" *ngFor="let reg of registers"
@@ -82,23 +106,15 @@
                   </div>
                 </div>
                 <div class="btn-group " ngbDropdown role="group" aria-label="Button group with nested dropdown">
-                  <button [disabled]="configurationSaved" id="btn-tipo" class="btn btn-outline-primary"
+                  <button [disabled]="configurationSavedArr" id="btn-tipo" class="btn btn-outline-primary"
                     ngbDropdownToggle>{{btnDefaultCarga.typeReg}}</button>
                   <div class="dropdown-menu" ngbDropdownMenu>
                     <button class="dropdown-item" *ngFor="let tipo of typeArray"
                       (click)="changeCarga('typeReg',tipo)">{{tipo}}</button>
                   </div>
                 </div>
-                <div class="btn-group " ngbDropdown role="group" aria-label="Button group with nested dropdown">
-                  <button [disabled]="configurationSaved" id="btn-cycles" class="btn btn-outline-primary"
-                    ngbDropdownToggle>{{btnDefaultCarga.cycles}}</button>
-                  <div class="dropdown-menu" ngbDropdownMenu>
-                    <button class="dropdown-item" *ngFor="let cycle of cycles"
-                      (click)="changeCarga('cycles', cycle)">{{cycle}}</button>
-                  </div>
-                </div>
-                <button id="btn-Agregar-LD" type="button" class="btn btn-outline-primary" disabled
-                  (click)="addInstructionLoad()">Agregar</button>
+                <button [disabled]="configurationSavedArr" id="btn-Agregar-LD" type="button"
+                  class="btn btn-outline-primary" disabled (click)="addInstructionLoad()">Agregar</button>
               </div>
               <div class="btn-group mr-3 bpadding-15">
                 <button class="btn1" data-toggle="modal" data-target="#portfolioModal2 ">
@@ -108,6 +124,22 @@
             </div>
           </div>
 
+          <div class="row">
+            <div class="col text">
+              <h5 class="text-secondary">Etiqueta para iniciar Lazo</h5>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <div class="btn-group mr-3 bpadding-15">
+                <div class="btn-group " ngbDropdown role="group" aria-label="Button group with nested dropdown">
+                  <button [disabled]="configurationSavedLazo" class="btn btn-outline-primary"
+                    (click)="habilitaCargaInst()">LAZO </button>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div class="row">
             <div class="col text">
@@ -119,7 +151,7 @@
             <div class="col">
               <div class="btn-group mr-3 bpadding-15">
                 <div class="btn-group " ngbDropdown role="group" aria-label="Button group with nested dropdown">
-                  <button [disabled]="configurationSaved" id="btn-type" class="btn btn-outline-primary"
+                  <button [disabled]="configurationSavedInst" id="btn-type" class="btn btn-outline-primary"
                     ngbDropdownToggle>{{btnDefaultIns.type}}</button>
                   <div class="dropdown-menu" ngbDropdownMenu>
                     <button class="dropdown-item" *ngFor="let inst of typeInstruction"
@@ -127,7 +159,7 @@
                   </div>
                 </div>
                 <div class="btn-group " ngbDropdown role="group" aria-label="Button group with nested dropdown">
-                  <button [disabled]="configurationSaved" id="btn-dst" class="btn btn-outline-primary"
+                  <button [disabled]="configurationSavedInst" id="btn-dst" class="btn btn-outline-primary"
                     ngbDropdownToggle>{{btnDefaultIns.dst}}</button>
                   <div class="dropdown-menu" ngbDropdownMenu>
                     <button class="dropdown-item" *ngFor="let reg of registers"
@@ -135,7 +167,7 @@
                   </div>
                 </div>
                 <div class="btn-group " ngbDropdown role="group" aria-label="Button group with nested dropdown">
-                  <button [disabled]="configurationSaved" id="btn-op1" class="btn btn-outline-primary"
+                  <button [disabled]="configurationSavedInst" id="btn-op1" class="btn btn-outline-primary"
                     ngbDropdownToggle>{{btnDefaultIns.op1}}</button>
                   <div class="dropdown-menu" ngbDropdownMenu>
                     <button class="dropdown-item" *ngFor="let reg of registers"
@@ -143,7 +175,7 @@
                   </div>
                 </div>
                 <div class="btn-group" ngbDropdown role="group" aria-label="Button group with nested dropdown">
-                  <button [disabled]="configurationSaved" id="btn-op2" class="btn btn-outline-primary"
+                  <button [disabled]="configurationSavedInst" id="btn-op2" class="btn btn-outline-primary"
                     ngbDropdownToggle> {{btnDefaultIns.op2}}</button>
                   <div class="dropdown-menu" ngbDropdownMenu>
                     <button class="dropdown-item" *ngFor="let reg of registers"
@@ -316,6 +348,18 @@
         </div>
 
         <div class=col-md-6>
+          <h5 class="text-secondary">Códigos de Ejemplo</h5>
+          <div class="btn-group rpadding-10 bpadding-15" role="group" aria-label="Basic example">
+            <button [disabled]="configurationSaved" type="button" class="btn btn-outline-primary"
+              (click)="changeExample1()">1</button>
+            <button [disabled]="configurationSaved" type="button" class="btn btn-outline-primary"
+              (click)="changeExample2()">2</button>
+            <button [disabled]="configurationSaved" type="button" class="btn btn-outline-primary"
+              (click)="changeExample3()">3</button>
+            <button [disabled]="configurationSaved" type="button" class="btn btn-outline-primary"
+              (click)="changeExample4()">4</button>
+          </div>
+
           <h5 class="text-secondary">Lista de Instrucciones Assembler</h5>
           <table class="table text-secondary">
             <tbody>
@@ -338,8 +382,7 @@
           aria-label="Button group with nested dropdown">
           <button id="btn-save" class="btn btn-outline-primary" [disabled]="configurationSaved"
             (click)="saveConfiguration()">Guardar</button>
-          <button id="btn-reset" class="btn btn-outline-primary" [disabled]="!configurationSaved"
-            (click)="resetConfiguration()">Reset</button>
+          <button id="btn-reset" class="btn btn-outline-primary" (click)="resetConfiguration()">Reset</button>
           <button id="btn-execute" class="btn btn-outline-primary" [disabled]="!executing"
             (click)="ejecutarLoopUnrolling()">Ejecutar</button>
         </div>
@@ -348,7 +391,7 @@
       <div class="row">
         <div class="col-md-12">
           <ngb-alert [dismissible]="false" *ngIf="showAlert">
-            <strong>Advertencia!</strong> Debes agregar una UF para ejecutar las instrucciones.
+            <strong>Advertencia!</strong> {{advertencia}}
           </ngb-alert>
         </div>
       </div>
@@ -357,7 +400,7 @@
   </section>
 
   <!-- About Section -->
-  <section class="page-section bg-primary text-white mb-0" id="about">
+  <section style="display: none" class="page-section bg-primary text-white mb-0" id="Desarrollo">
     <div class="container">
 
       <!-- About Section Heading -->
@@ -374,55 +417,6 @@
 
 
       <div class="row justify-content-center bpadding-15">
-        <div class=col-md-8>
-          <div class="row">
-            <div class="col bpadding-15">
-              <h5 class="text-white bpadding-15">Simulador</h5>
-              <button *ngIf="executeLoop" id="btn-next" class="btn btn-outline-secondary"
-                (click)="nextInstruction()">Siguiente ciclo</button>
-            </div>
-          </div>
-
-          <div class="class row">
-            <div class="col">
-              <div id="table-processor">
-                <div class=" processor-table">
-                  <table id="tablacycle" class="table table-bordered " *ngIf="executeLoop">
-                    <thead>
-                      <tr>
-                        <th scope="col">Ciclo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {{rowCycle}}
-                    </tbody>
-                  </table>
-
-                  <table id="tablaDispatch" class="table table-bordered " *ngIf="executeLoop">
-                    <thead>
-                      <th *ngFor="let header of DHeaders">
-                        {{header}}
-                      </th>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                  </table>
-
-                  <table id="tablaUF" class="table table-bordered " *ngIf="executeLoop">
-                    <thead>
-                      <th *ngFor="let header of UFHeaders">
-                        {{header}}
-                      </th>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class=col-md-4>
           <div class="row">
             <div class="col text">
@@ -441,12 +435,67 @@
             </tbody>
           </table>
         </div>
+
+        <div class=col-md-8>
+          <div class="row">
+            <div class="col bpadding-15">
+              <h5 class="text-white bpadding-15">Simulador de Bucle en Procesador</h5>
+            </div>
+          </div>
+
+          <div class="class row bpadding-15">
+            <div class="col justify-content-center">
+              <div id="table-processor">
+                <div class="processor-table">
+                  <table id="tablacycle" class="table table-bordered text-white" *ngIf="executeLoop">
+                    <thead>
+                      <tr>
+                        <th scope="col">Ciclo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{rowCycle}}
+                    </tbody>
+                  </table>
+
+                  <table id="tablaDispatch" class="table table-bordered text-white" *ngIf="executeLoop">
+                    <thead>
+                      <th *ngFor="let header of DHeaders">
+                        {{header}}
+                      </th>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                  </table>
+
+                  <table id="tablaUF" class="table table-bordered text-white " *ngIf="executeLoop">
+                    <thead>
+                      <th *ngFor="let header of UFHeaders">
+                        {{header}}
+                      </th>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col bpadding-15">
+              <button *ngIf="executeLoop" id="btn-next" class="btn btn-outline-secondary"
+                (click)="nextInstruction()">Siguiente ciclo</button>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Contact Section -->
-  <section class="page-section" id="contact">
+  <section style="display: none;" class="page-section" id="Result">
     <div class="container">
 
       <!-- Contact Section Heading -->
@@ -461,13 +510,30 @@
         <div class="divider-custom-line"></div>
       </div>
 
+      <div class="row justify-content-center bpadding-15">
+        <div class=col-md-12>
+          <div class="row">
+            <div class="col text-center">
+              <h5 class="text-secondary">Ejecución Secuencial: {{cantidadCiclosFor}} * {{timeSec}} ciclos =
+                {{tiempoTotalsecuencial}}</h5>
+              <br>
+              <h5 class="text-secondary">Ejecución Planificada: {{ciclosDesarrollados}} * {{timePar}} ciclos =
+                {{tiempoTotalplanificado}}</h5>
+              <br>
+              <h5 class="text-secondary">Aceleración: {{tiempoTotalsecuencial}} / {{tiempoTotalplanificado}} =
+                {{aceleracion}}</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
   <!-- Copyright Section -->
   <section class="copyright py-4 text-center text-white">
     <div class="container">
-      <small>Copyright &copy; Your Website 2019</small>
+      <h6>Desarrollado por Cattaneo Joaquín y Pedrozo Ulises</h6>
     </div>
   </section>
 
@@ -563,7 +629,7 @@
             <div class="row justify-content-center">
               <div class="col-lg-8">
                 <!-- Portfolio Modal - Title -->
-                <h4 class="portfolio-modal-title text-secondary mb-0">Como cargar las isntrucciones</h4>
+                <h4 class="portfolio-modal-title text-secondary mb-0">Como cargar las instrucciones</h4>
                 <!-- Icon Divider -->
                 <div class="divider-custom">
                   <div class="divider-custom-line"></div>

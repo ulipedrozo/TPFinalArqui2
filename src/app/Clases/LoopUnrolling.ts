@@ -6,6 +6,7 @@ export class LoopUnrolling {
 
     constructor(list) {
         this.listInstructions = list;
+        console.log(this.listInstructions);
     }
 
     contadorInstrucciones = 1;
@@ -27,6 +28,7 @@ export class LoopUnrolling {
     }
 
     ejecutar(maxUnroll: number) {
+
         let listResul = new Array<Instruction>();
 
         let indice = 0;
@@ -67,13 +69,13 @@ export class LoopUnrolling {
                         if ((this.listInstructions[i].getArrayType() == "ENTERO")) {
 
                             inst = new Instruction("S" + this.contadorInstrucciones, this.listInstructions[i].getType(), this.mapReg.get(this.listInstructions[i].getDestination())[j],
-                                this.listInstructions[i].getOp1().replace('0', cont.toString()), "", "MEM", this.listInstructions[i].getArrayType());
+                                this.listInstructions[i].getOp1().replace('0', cont.toString()), "", "MEM", this.listInstructions[i].getArrayType(), 0);
                             listResul.push(inst);
                             this.contadorInstrucciones++;
                             cont = cont - 4;
                         } else {
                             inst = new Instruction("S" + this.contadorInstrucciones, this.listInstructions[i].getType(), this.mapReg.get(this.listInstructions[i].getDestination())[j],
-                                this.listInstructions[i].getOp1().replace('0', cont.toString()), "", "MEM", this.listInstructions[i].getArrayType());
+                                this.listInstructions[i].getOp1().replace('0', cont.toString()), "", "MEM", this.listInstructions[i].getArrayType(), 0);
                             listResul.push(inst);
                             this.contadorInstrucciones++;
                             cont = cont - 8;
@@ -96,13 +98,13 @@ export class LoopUnrolling {
                         if ((this.listInstructions[i].getArrayType() == "ENTERO")) {
 
                             inst = new Instruction("S" + this.contadorInstrucciones, this.listInstructions[i].getType(), cont.toString() + " (" + reg + ")",
-                                op1, "", "MEM", this.listInstructions[i].getArrayType());
+                                op1, "", "MEM", this.listInstructions[i].getArrayType(), 0);
                             listResul.push(inst);
                             this.contadorInstrucciones++;
                             cont = cont - 4;
                         } else {
                             inst = new Instruction("S" + this.contadorInstrucciones, this.listInstructions[i].getType(), cont.toString() + " (" + reg + ")",
-                                op1, "", "MEM", this.listInstructions[i].getArrayType());
+                                op1, "", "MEM", this.listInstructions[i].getArrayType(), 0);
                             listResul.push(inst);
                             this.contadorInstrucciones++;
                             cont = cont - 8;
@@ -116,8 +118,8 @@ export class LoopUnrolling {
                     for (let i = 0; i < maxUnroll; i++) {
                         list.push(this.getSiguienteReg());
                     }
-
                     this.mapReg.set(this.listInstructions[i].getDestination(), list);
+                    
                     for (let j = 0; j < maxUnroll; j++) {
                         let op1;
                         let op2;
@@ -131,7 +133,7 @@ export class LoopUnrolling {
                             op2 = this.listInstructions[i].getOp2();
 
                         let inst = new Instruction("S" + this.contadorInstrucciones, this.listInstructions[i].getType(), this.mapReg.get(this.listInstructions[i].getDestination())[j],
-                            op1, op2, "ARITH", "");
+                            op1, op2, "ARITH", "", 0);
                         this.contadorInstrucciones++;
                         listResul.push(inst);
 
@@ -145,12 +147,12 @@ export class LoopUnrolling {
                 if (this.listInstructions[i].getOp2().includes('4')) {
                     let shift = 4 * maxUnroll;
                     inst = new Instruction("S" + this.contadorInstrucciones, this.listInstructions[i].getType(), this.listInstructions[i].getDestination(),
-                        this.listInstructions[i].getOp1(), "#" + shift.toString(), "MEM", "");
+                        this.listInstructions[i].getOp1(), "#" + shift.toString(), "ARITH", "", 0);
                     this.contadorInstrucciones++;
                 } else {
                     let shift = 8 * maxUnroll;
                     inst = new Instruction("S" + this.contadorInstrucciones, this.listInstructions[i].getType(), this.listInstructions[i].getDestination(),
-                        this.listInstructions[i].getOp1(), "#" + shift.toString(), "MEM", "");
+                        this.listInstructions[i].getOp1(), "#" + shift.toString(), "ARITH", "", 0);
                     this.contadorInstrucciones++;
                 }
                 listResul.push(inst);

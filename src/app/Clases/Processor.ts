@@ -28,7 +28,6 @@ export class Processor {
         let encontro = false;
 
         let indice = 0;
-        let cortar = false;
 
         for (let i = indice; i < this.listInstruction.length - 1; i++) {
             if (this.listInstruction[i].getType() != "ST")
@@ -69,7 +68,10 @@ export class Processor {
         //remuevo instrucciones de la uf
         this.removeInstructionUF();
         //AGREGO A UF
-        this.updateUF();
+        let ubicados = this.updateUF();
+
+        // saco instrucciones del dispatch
+        this.removeFromDispatch(ubicados);
 
         //actualizo dispatch
         for (let i = 0; i < this.dispatcher.getGrade() && this.listInstruction.length != 0 && !this.dispatcher.isBusy(); i++) {
@@ -93,22 +95,26 @@ export class Processor {
 
     private updateUF() {
         let i = 0;
+        let ubicados = new Array();
         while (i < this.dispatcher.instruction.length) {
             let index = this.getUFFree(this.dispatcher.instruction[i]);
             if (index != -1) {
-                let inst = this.dispatcher.instruction[i];
-                if (!this.hasDependence(inst)) {
+                let inst: Instruction = this.dispatcher.instruction[i];
+                if (!this.hasDependenceUF(inst) && !this.dispatcher.hasDependenceD(inst)) {
                     this.uf[index].addInstruction(inst);
                     this.uf[index].setBusy(true);
-                    this.dispatcher.getInstruction();
+                    ubicados.push(inst);
                 }
-                else {
-                    i++;
-                }
-            } else {
-                i++;
-            }
+            } 
+            i++;
         }
+        return ubicados;
+    }
+
+    private removeFromDispatch(ubicados){
+        ubicados.forEach(e => {
+            this.dispatcher.remove(e);
+        });
     }
 
     private removeInstructionUF() {
@@ -122,17 +128,7 @@ export class Processor {
         }
     }
 
-    private getPosList(id: string) {
-        let index: number = 0;
-        for (let i = index; i < this.listInstruction.length; i++) {
-            if (this.listInstruction[i].getId() == id)
-                index = i;
-        }
-
-        return index;
-    }
-
-    private hasDependence(inst: Instruction) {
+    private hasDependenceUF(inst: Instruction) {
         for (let i = 0; i < this.uf.length; i++) {
             if (this.uf[i].getInstruction() != null) {
                 if (this.uf[i].getInstruction().existDependency(inst))
@@ -141,6 +137,7 @@ export class Processor {
         }
         return false;
     }
+
     private getUFFree(inst: Instruction) {
         for (let i = 0; i < this.uf.length; i++) {
             if (!this.uf[i].isBusy() && this.uf[i].getType() == inst.getUFType())
