@@ -113,7 +113,7 @@ export class AppComponent implements OnInit {
     op2: "Op2"
   };
 
-  mapTipoArreglos = new Map();
+  //mapTipoArreglos = new Map();
 
   btnDefaultCarga = {
     typeReg: "Tipo",
@@ -252,7 +252,7 @@ export class AppComponent implements OnInit {
       tamTot = tamano;
 
     this.configurationSavedLazo = false;
-    this.mapTipoArreglos.set(this.btnDefaultCarga.dstLoad, tipo);
+    //this.mapTipoArreglos.set(this.btnDefaultCarga.dstLoad, tipo);
     instNueva = new Instruction("", "LD", this.btnDefaultCarga.dstLoad, tamTot.toString(), "", "ARITH", tipo, this.cantidadCiclosFor);
     this.listInstructions.push(instNueva);
   }
@@ -329,11 +329,11 @@ export class AppComponent implements OnInit {
     let instNueva;
 
     if (this.btnDefaultIns.type == "ST") {
-      instNueva = new Instruction("", this.btnDefaultIns.type, "0 (" + this.btnDefaultIns.dst + ")", this.btnDefaultIns.op1, "", "MEM", this.mapTipoArreglos.get(this.btnDefaultIns.dst), 0);
+      instNueva = new Instruction("", this.btnDefaultIns.type, "0 (" + this.btnDefaultIns.dst + ")", this.btnDefaultIns.op1, "", "MEM", ""/*this.mapTipoArreglos.get(this.btnDefaultIns.dst)*/, 0);
     }
     else
       if (this.btnDefaultIns.type == "LD") {
-        instNueva = new Instruction("", this.btnDefaultIns.type, this.btnDefaultIns.dst, "0 (" + this.btnDefaultIns.op1 + ")", "", "MEM", this.mapTipoArreglos.get(this.btnDefaultIns.op1), 0);
+        instNueva = new Instruction("", this.btnDefaultIns.type, this.btnDefaultIns.dst, "0 (" + this.btnDefaultIns.op1 + ")", "", "MEM", ""/*this.mapTipoArreglos.get(this.btnDefaultIns.op1)*/, 0);
       }
       else
         if (this.btnDefaultIns.type == "BNEZ")
@@ -351,7 +351,7 @@ export class AppComponent implements OnInit {
     let i = this.listInstructions.indexOf(inst);
     if (this.listInstructions[i].getType() == "LD" && !this.listInstructions[i].getOp1().includes('(')) {
       this.recalculateCycles(i, this.listInstructions[i].getciclosFor(), this.listInstructions[i].getArrayType());
-      this.mapTipoArreglos.delete(this.listInstructions[i].getDestination());
+      //this.mapTipoArreglos.delete(this.listInstructions[i].getDestination());
     }
     this.listInstructions.splice(i, 1);
 
@@ -392,9 +392,9 @@ export class AppComponent implements OnInit {
   }
 
   saveConfiguration() {
+    //console.log(this.mapTipoArreglos);
     if (this.listInstructions.length != 0)
       if (this.chequeoCiclosArr()) {
-        console.log(this.chequeoCiclosArr())
         if (this.numArithmetic != 0 || this.numMemory != 0 || this.numMultifunction != 0) {
           this.showAlert = false;
           this.configurationSaved = true;
@@ -410,7 +410,6 @@ export class AppComponent implements OnInit {
           this.showAlert = true;
         }
       } else {
-        console.log("Entra 2");
         this.advertencia = "Todos los arreglos deben ser definidos para la misma cantidad de Ciclos."
         this.showAlert = true;
       }
@@ -459,6 +458,7 @@ export class AppComponent implements OnInit {
     this.sigInstruction = false;
     this.executing = false;
     this.executeLoop = false;
+    //this.mapTipoArreglos = new Map();
     this.listInstructions = new Array<Instruction>();
     this.listInstructionsUnrolling = null;
     this.listaSinLazo = new Array<Instruction>();
@@ -470,9 +470,11 @@ export class AppComponent implements OnInit {
     document.getElementById("Desarrollo").style.display = "block";
 
     this.maxUnroll = Math.max(this.numArithmetic, this.numMemory, this.numMultifunction);
+    console.log(this.listInstructions);
+    this.setArrayTypes();
     this.setCycles();
     this.timeSec = this.getTimeSecuencial();
-
+    console.log(this.listInstructions);
     let loop = new LoopUnrolling(this.listInstructions);
     this.listInstructionsUnrolling = loop.ejecutar(this.maxUnroll);
     this.setCyclesUnrolling();
@@ -480,17 +482,32 @@ export class AppComponent implements OnInit {
 
   }
 
+  setArrayTypes(){
+
+    let map = new Map();
+    this.listInstructions.forEach(e => {
+      if (e.getType() == "LD" && !e.getOp1().includes('('))
+        map.set(e.getDestination(), e.getArrayType());
+      else if (e.getType() == "LD"){
+        e.setArrayType(map.get(this.getOperandoParentesis(e.getOp1())));
+      } else if (e.getType() == "ST"){
+        e.setArrayType(map.get(this.getOperandoParentesis(e.getDestination())));
+      }
+
+    });
+
+
+  }
+
   public getTimeSecuencial() {
     let sum = 0;
     let pasoLazo: boolean = false;
-    console.log(this.listInstructions);
     for (let inst of this.listInstructions) {
       if (pasoLazo)
         sum = sum + parseInt(inst.getcycles());
       if (inst.getType() == 'LAZO')
         pasoLazo = true;
     }
-    console.log(sum);
     return sum;
   }
 
@@ -524,7 +541,6 @@ export class AppComponent implements OnInit {
       this.sigInstruction = false;
       document.getElementById("Result").style.display = "block";
       this.timePar = this.cpu.getCycleCounter();
-      console.log(this.timeSec);
       this.ciclosDesarrollados = this.cantidadCiclosFor / this.maxUnroll;
 
       this.tiempoTotalsecuencial = this.cantidadCiclosFor * this.timeSec;
@@ -597,6 +613,10 @@ export class AppComponent implements OnInit {
     this[desc + 'Headers'] = array;
   }
 
-
+  private getOperandoParentesis(op: string): string {
+    let pos1: number = op.indexOf('(');
+    let pos2: number = op.indexOf(')');
+    return op.substring(pos1 + 1, pos2);
+}
 
 }

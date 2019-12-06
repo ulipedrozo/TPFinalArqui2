@@ -6,7 +6,6 @@ export class LoopUnrolling {
 
     constructor(list) {
         this.listInstructions = list;
-        console.log(this.listInstructions);
     }
 
     contadorInstrucciones = 1;

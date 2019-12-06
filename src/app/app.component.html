@@ -561,7 +561,7 @@
             <div class="row justify-content-center">
               <div class="col-lg-8">
                 <!-- Portfolio Modal - Title -->
-                <h4 class="portfolio-modal-title text-secondary mb-0">Información</h4>
+                <h4 class="portfolio-modal-title text-secondary mb-0">Loop Unrolling v1.4</h4>
                 <!-- Icon Divider -->
                 <div class="divider-custom">
                   <div class="divider-custom-line"></div>
@@ -571,7 +571,11 @@
                   <div class="divider-custom-line"></div>
                 </div>
                 <!-- Portfolio Modal - Text -->
-                <p class="mb-5">Aca va la información de la Aplicación</p>
+                <p class="mb-5">Desarrolado por los alumnos Joaquín Cattaneo y Ulises Pedrozo, para la cátedra de
+                  Arquitectura de
+                  Computadoras y Técnicas Digitales.</p>
+                <p>Coaching: Martín Menchón.</p>
+                <p>2019 - Todos los derechos reservados.</p>
               </div>
             </div>
           </div>
@@ -595,7 +599,7 @@
             <div class="row justify-content-center">
               <div class="col-lg-8">
                 <!-- Portfolio Modal - Title -->
-                <h4 class="portfolio-modal-title text-secondary mb-0">Como cargar los arreglos</h4>
+                <h4 class="portfolio-modal-title text-secondary mb-0">Cómo cargar los arreglos</h4>
                 <!-- Icon Divider -->
                 <div class="divider-custom">
                   <div class="divider-custom-line"></div>
@@ -605,7 +609,18 @@
                   <div class="divider-custom-line"></div>
                 </div>
                 <!-- Portfolio Modal - Text -->
-                <p class="mb-5">Aca va la información de como cargar los arreglos</p>
+                <p class="mb-5">Antes de comenzar la carga de instrucciones, es necesario declarar todos los arreglos
+                  que necesitemos
+                  en nuestro código. Para eso se encuentra el primer panel de carga. El mismo consta de una instruccion
+                  LOAD a la cual se le asigna
+                  un registro destino al cual se le irá haciendo el shift de posiciones de memoria posteriormente.
+                  Tambien debemos declarar
+                  de que tipo será el arreglo (ENTERO o DOUBLE) y la cantidad de ciclos que contendrá el bucle que luego
+                  será desenrrollado. Por ejemplo:</p>
+                <p>LD------R1------4000</p>
+                <p>Esta instruccion utiliza el registro R1 para cargar el primer arreglo de enteros, que al ser de
+                  tamaño 4 por 1000 ciclos
+                  nos da un total de 4000 posiciones de memoria.</p>
               </div>
             </div>
           </div>
@@ -629,7 +644,7 @@
             <div class="row justify-content-center">
               <div class="col-lg-8">
                 <!-- Portfolio Modal - Title -->
-                <h4 class="portfolio-modal-title text-secondary mb-0">Como cargar las instrucciones</h4>
+                <h4 class="portfolio-modal-title text-secondary mb-0">Cómo cargar las instrucciones</h4>
                 <!-- Icon Divider -->
                 <div class="divider-custom">
                   <div class="divider-custom-line"></div>
@@ -639,7 +654,24 @@
                   <div class="divider-custom-line"></div>
                 </div>
                 <!-- Portfolio Modal - Text -->
-                <p class="mb-5">Aca va la información de como cargar las instrucciones</p>
+                <p class="mb-5">Cuando los arreglos se encuentren cargados, podemos proceder a cargar las instrucciones
+                  de nuestro código.
+                  Por lo general las instrucciones comienzan con un LAZO sin argumentos, que será el principio de
+                  nuestro loop de instrucciones.
+                  Luego comenzaremos a cargar las instrucciones de nuestro loop, se carga en un registro nuevo la
+                  posicion en memoria 0 de nuestro
+                  registro asociado al arreglo (LOAD), se realiza la operación aritmética que se desee entre el registro
+                  cargado anteriormente y otro
+                  nuevo (ADD, SUB, MUL, DIV), y por último se guarda el valor del registro destino en la posicion de
+                  memoria 0 del arreglo (ST). Finalmente
+                  se realiza el debido corrimiento de posiciones de memoria del arreglo (SUB) y se invoca a la
+                  instruccion BNEZ LAZO. Aqui un ejemplo de programa:</p>
+                <p>LAZO</p>
+                <p>LD------R2------0(R1)</p>
+                <p>ADD-----R4------R2------R3</p>
+                <p>ST------0(R1)---R4</p>
+                <p>SUB-----R1------R1------#4</p>
+                <p>BNEZ----R1------LAZO</p>
               </div>
             </div>
           </div>
@@ -647,5 +679,6 @@
       </div>
     </div>
   </div>
+
 
 </body>
