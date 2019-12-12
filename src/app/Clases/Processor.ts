@@ -40,6 +40,8 @@ export class Processor {
                             this.listInstruction[i].addDependency(this.listInstruction[j].getId());
                         if (this.listInstruction[i].getDestination() == this.listInstruction[j].getDestination()) {
                             encontro = true;
+                            if (this.listInstruction[j].getType() == "BNEZ")
+                                this.listInstruction[i].addDependency(this.listInstruction[j].getId());
                         }
                     }
                     else {

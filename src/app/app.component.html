@@ -443,6 +443,13 @@
             </div>
           </div>
 
+          <div class="row">
+            <div class="col bpadding-15">
+              <button *ngIf="executeLoop" id="btn-next" class="btn btn-outline-secondary"
+                (click)="nextInstruction()">Siguiente ciclo</button>
+            </div>
+          </div>
+
           <div class="class row bpadding-15">
             <div class="col justify-content-center">
               <div id="table-processor">
@@ -479,13 +486,6 @@
 
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col bpadding-15">
-              <button *ngIf="executeLoop" id="btn-next" class="btn btn-outline-secondary"
-                (click)="nextInstruction()">Siguiente ciclo</button>
             </div>
           </div>
 
@@ -561,7 +561,7 @@
             <div class="row justify-content-center">
               <div class="col-lg-8">
                 <!-- Portfolio Modal - Title -->
-                <h4 class="portfolio-modal-title text-secondary mb-0">Loop Unrolling v1.4</h4>
+                <h4 class="portfolio-modal-title text-secondary mb-0">Loop Unrolling</h4>
                 <!-- Icon Divider -->
                 <div class="divider-custom">
                   <div class="divider-custom-line"></div>
@@ -571,10 +571,12 @@
                   <div class="divider-custom-line"></div>
                 </div>
                 <!-- Portfolio Modal - Text -->
-                <p class="mb-5">Desarrolado por los alumnos Joaquín Cattaneo y Ulises Pedrozo, para la cátedra de
+                <p>Herramienta para el desenrollo de ciclos de una fracción de código assembler con el objetivo de
+                  mejorar la ejecución
+                  del programa mediante la planificación y eliminacion de instrucciones que controlan el bucle.</p>
+                <p>Desarrolado por los alumnos Joaquín Cattaneo y Ulises Pedrozo, para la cátedra de
                   Arquitectura de
                   Computadoras y Técnicas Digitales.</p>
-                <p>Coaching: Martín Menchón.</p>
                 <p>2019 - Todos los derechos reservados.</p>
               </div>
             </div>
@@ -609,18 +611,16 @@
                   <div class="divider-custom-line"></div>
                 </div>
                 <!-- Portfolio Modal - Text -->
-                <p class="mb-5">Antes de comenzar la carga de instrucciones, es necesario declarar todos los arreglos
+                <p>Antes de comenzar la carga de instrucciones, es necesario declarar todos los arreglos
                   que necesitemos
-                  en nuestro código. Para eso se encuentra el primer panel de carga. El mismo consta de una instruccion
-                  LOAD a la cual se le asigna
-                  un registro destino al cual se le irá haciendo el shift de posiciones de memoria posteriormente.
-                  Tambien debemos declarar
-                  de que tipo será el arreglo (ENTERO o DOUBLE) y la cantidad de ciclos que contendrá el bucle que luego
-                  será desenrrollado. Por ejemplo:</p>
+                  en nuestro código. Esta sección contiene la instrucción LOAD la cual carga en
+                  un registro la cantidad de bytes necesarias para hacer los corrimientos de memoria.
+                  Estos bytes se definen mediante la cantidad de ciclos del loop * el temaño del tipo de dato del
+                  arreglo. Si es de tipo entero ocupa 4 bytes y si es double 8.
+                  Damos un ejemplo:</p>
+                <p>Si definimos la cantidad de ciclos en 1000 y queremos cargar un arreglo de enteros en el registro R1, la
+                  instrucción sería la siguiente:</p>
                 <p>LD------R1------4000</p>
-                <p>Esta instruccion utiliza el registro R1 para cargar el primer arreglo de enteros, que al ser de
-                  tamaño 4 por 1000 ciclos
-                  nos da un total de 4000 posiciones de memoria.</p>
               </div>
             </div>
           </div>

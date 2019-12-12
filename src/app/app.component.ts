@@ -544,8 +544,13 @@ export class AppComponent implements OnInit {
       this.ciclosDesarrollados = this.cantidadCiclosFor / this.maxUnroll;
 
       this.tiempoTotalsecuencial = this.cantidadCiclosFor * this.timeSec;
+      this.ciclosDesarrollados = parseFloat(this.ciclosDesarrollados.toFixed(2));
       this.tiempoTotalplanificado = this.ciclosDesarrollados * this.timePar;
+      this.tiempoTotalplanificado = parseFloat(this.tiempoTotalplanificado.toFixed(2));
       this.aceleracion = this.tiempoTotalsecuencial / this.tiempoTotalplanificado;
+      this.aceleracion = parseFloat(this.aceleracion.toFixed(2));
+      
+
     }
   }
 
