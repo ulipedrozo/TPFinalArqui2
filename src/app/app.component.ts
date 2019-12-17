@@ -56,6 +56,7 @@ export class AppComponent implements OnInit {
   executing = false;
   executeLoop = false;
   DHeaders: Array<string>;
+  rowCycle: Array<string>;
   UFHeaders: Array<string>;
   cpu: Processor;
 
